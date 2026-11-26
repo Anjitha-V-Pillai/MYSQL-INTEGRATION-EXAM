@@ -1,5 +1,6 @@
-
 import mysql.connector
+
+
 class Bank_db:
 
     def __init__(self):
@@ -12,6 +13,7 @@ class Bank_db:
             )
             print("Database Connected Successfully")
         except:
+            self.con = None
             print("Connection Failed")
 
     def create(self, name, account_type, phone, balance):
@@ -55,7 +57,6 @@ class Bank_db:
         except:
             print("Failed to Read")
 
-
     def retrieve(self, keyword):
         try:
             cursor = self.con.cursor()
@@ -79,7 +80,6 @@ class Bank_db:
         except:
             print("Failed to Search")
 
-
     def deposit(self, account_id, amount):
         try:
             if amount <= 0:
@@ -101,7 +101,6 @@ class Bank_db:
         except:
             print("Failed to Deposit")
 
-
     def withdraw(self, account_id, amount):
         try:
             if amount <= 0:
@@ -122,7 +121,6 @@ class Bank_db:
 
         except:
             print("Failed to Withdraw")
-
 
     def delete(self, account_id):
         try:
@@ -153,76 +151,82 @@ class Bank_db:
             print("Total Balance:", total_bal)
             print("Average Balance:", avg_bal)
 
+            query = "select account_type, count(*) from accounts group by account_type"
+            cursor.execute(query)
+            type_records = cursor.fetchall()
+            print("Accounts by Type:")
+            for row in type_records:
+                print(row)
+
         except:
             print("Failed to get summary")
 
 
 b = Bank_db()
 
-if hasattr(b, 'con') and b.con.is_connected():
+while(1):
 
-    while(1):
+    print("1. Create Account")
+    print("2. View All Accounts")
+    print("3. Search Account")
+    print("4. Deposit Amount")
+    print("5. Withdraw Amount")
+    print("6. Delete Account")
+    print("7. Account Summary")
+    print("8. Exit")
 
-        print("1. Create Account")
-        print("2. View All Accounts")
-        print("3. Search Account")
-        print("4. Deposit Amount")
-        print("5. Withdraw Amount")
-        print("6. Delete Account")
-        print("7. Account Summary")
-        print("8. Exit")
+    try:
+        ch = int(input("Enter your choice:"))
+    except ValueError:
+        print("Invalid Input")
+        continue
 
-        try:
-            ch = int(input("Enter your choice:"))
-        except ValueError:
-            print("Invalid Input")
-            continue
+    if ch == 1:
+        n = input("Enter customer name:")
+        t = input("Enter account type:")
+        p = input("Enter phone:")
+        bal = int(input("Enter opening balance:"))
+        b.create(n, t, p, bal)
 
-        if ch == 1:
-            n = input("Enter customer name:")
-            t = input("Enter account type:")
-            p = input("Enter phone:")
-            bal = float(input("Enter opening balance:"))
-            b.create(n, t, p, bal)
-
-        elif ch == 2:
-            opt = input("Filter by minimum balance? (y/n):")
-            if opt == "y":
-                min_b = float(input("Enter minimum balance:"))
-                b.read(min_b)
-            else:
-                b.read()
-
-        elif ch == 3:
-            key = input("Enter account ID or customer name:")
-            b.retrieve(key)
-
-        elif ch == 4:
-            acc_id = int(input("Enter account ID:"))
-            amt = float(input("Enter deposit amount:"))
-            b.deposit(acc_id, amt)
-
-        elif ch == 5:
-            acc_id = int(input("Enter account ID:"))
-            amt = float(input("Enter withdrawal amount:"))
-            b.withdraw(acc_id, amt)
-
-        elif ch == 6:
-            acc_id = int(input("Enter account ID:"))
-            confirm = input("Confirm delete? (y/n):")
-
-            if confirm == "y":
-                b.delete(acc_id)
-            else:
-                print("Cancelled")
-
-        elif ch == 7:
-            b.summary()
-
-        elif ch == 8:
-            b.con.close()
-            print("Database Connection Closed")
-            break
-
+    elif ch == 2:
+        opt = input("Filter by minimum balance? (y/n):")
+        if opt == "y":
+            min_b = int(input("Enter minimum balance:"))
+            b.read(min_b)
         else:
-            print("Invalid Input")
+            b.read()
+
+    elif ch == 3:
+        key = input("Enter account ID or customer name:")
+        b.retrieve(key)
+
+    elif ch == 4:
+        acc_id = int(input("Enter account ID:"))
+        amt = int(input("Enter deposit amount:"))
+        b.deposit(acc_id, amt)
+
+    elif ch == 5:
+        acc_id = int(input("Enter account ID:"))
+        amt = int(input("Enter withdrawal amount:"))
+        b.withdraw(acc_id, amt)
+
+    elif ch == 6:
+        acc_id = int(input("Enter account ID:"))
+        confirm = input("Confirm delete? (y/n):")
+
+        if confirm == "y":
+            b.delete(acc_id)
+        else:
+            print("Cancelled")
+
+    elif ch == 7:
+        b.summary()
+
+    elif ch == 8:
+        if b.con:
+            b.con.close()
+        print("Database Connection Closed")
+        break
+
+    else:
+        print("Invalid Input")
