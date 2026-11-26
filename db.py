@@ -1,6 +1,5 @@
 import mysql.connector
 
-
 class Bank_db:
 
     def __init__(self):
